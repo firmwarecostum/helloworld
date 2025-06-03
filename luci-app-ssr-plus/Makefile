@@ -73,8 +73,8 @@ select PACKAGE_luci-lib-ipkg if PACKAGE_$(PKG_NAME)
 
 choice
 	prompt "Shadowsocks Client Selection"
-	default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client if aarch64 || x86_64
-	default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Client
+	#default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client if aarch64 || x86_64
+	#default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Client
 
 	config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_NONE_Client
 	bool "None"
@@ -90,9 +90,9 @@ endchoice
 
 choice
 	prompt "Shadowsocks Server Selection"
-	default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server if aarch64
-	default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server if i386||x86_64||arm
-	default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_NONE_Server
+	#default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server if aarch64
+	#default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server if i386||x86_64||arm
+	#default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_NONE_Server
 
 	config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_NONE_Server
 	bool "None"
@@ -108,8 +108,8 @@ endchoice
 
 choice
 	prompt "V2ray-core Selection"
-	default PACKAGE_$(PKG_NAME)_INCLUDE_Xray if aarch64||arm||i386||x86_64
-	default PACKAGE_$(PKG_NAME)_INCLUDE_NONE_V2RAY
+	#default PACKAGE_$(PKG_NAME)_INCLUDE_Xray if aarch64||arm||i386||x86_64
+	#default PACKAGE_$(PKG_NAME)_INCLUDE_NONE_V2RAY
 
 	config PACKAGE_$(PKG_NAME)_INCLUDE_NONE_V2RAY
 	bool "None"
@@ -127,7 +127,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_DNS2SOCKS
 	bool "Include DNS2socks"
-	default y
+	default n
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_DNS2SOCKS_RUST
 	bool "Include DNS2socks-Rust"
@@ -139,7 +139,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_DNSPROXY
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_MosDNS
 	bool "Include MosDNS"
-	default y if aarch64||arm||i386||x86_64
+	default n if aarch64||arm||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria
 	bool "Include Hysteria"
