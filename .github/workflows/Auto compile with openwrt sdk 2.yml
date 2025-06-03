@@ -13,20 +13,20 @@ on:
         default: 'false'
   push:
     branches:
-      - 'main'
+      - 'master'
     paths:
       - ''
 env:
   TZ: Asia/Makassar
-  passwall2: ${{ github.repository }}
-  packages: predators46/openwrt-passwall-packages
+  helloworld: ${{ github.repository }}
+  packages: predators46/helloworld
 
 jobs:
   job_check:
     name: Check Version
     runs-on: ubuntu-22.04
     outputs:
-      passwall2_version: ${{ steps.check_version.outputs.latest_version }}
+      helloworld_version: ${{ steps.check_version.outputs.latest_version }}
       has_update: ${{ steps.check_version.outputs.has_update }}
     steps:
       - name: Checkout
@@ -38,9 +38,9 @@ jobs:
       - name: Check version
         id: check_version
         env:
-          url_release: https://api.github.com/repos/${{ env.passwall2 }}/releases/latest
+          url_release: https://api.github.com/repos/${{ env.helloworld }}/releases/latest
         run: |
-          cd luci-app-passwall2
+          cd luci-app-ssr-plus
           latest_version=$(awk -F ':=' '/PKG_VERSION|PKG_RELEASE/ {print $2}' Makefile | sed ':a;N;s/\n$//;s/\n/-/;ba')
           latest_release=$(wget -qO- -t1 -T2 ${{env.url_release}} | awk -F '"' '/tag_name/{print $4}')
           has_update=$([ "${latest_version}" != "${latest_release}" ] && echo true || echo false)
@@ -54,9 +54,9 @@ jobs:
         if: steps.check_version.outputs.has_update == 'true'
         run: |
           echo "## :mega:Update content" >> release.txt
-          echo "![](https://img.shields.io/github/downloads/${{ env.passwall2 }}/${{steps.check_version.outputs.latest_version}}/total?style=flat-square)" >> release.txt
-          echo "### Passwall2 Info" >> release.txt
-          echo "**:minidisc: Passwall2 Version: ${{steps.check_version.outputs.latest_version}}**" >> release.txt
+          echo "![](https://img.shields.io/github/downloads/${{ env.helloworld }}/${{steps.check_version.outputs.latest_version}}/total?style=flat-square)" >> release.txt
+          echo "### helloworld Info" >> release.txt
+          echo "**:minidisc: helloworld Version: ${{steps.check_version.outputs.latest_version}}**" >> release.txt
           echo "**:gear: OpenWrt SDK Version: 24.10.1**" >> release.txt
           touch release.txt
 
@@ -70,8 +70,8 @@ jobs:
           body_path: release.txt
 
 
-  job_build_passwall2:
-    name: Build passwall2
+  job_build_helloworld:
+    name: Build helloworld
     needs: job_check
     if: needs.job_check.outputs.has_update == 'true'
     runs-on: ubuntu-22.04
@@ -94,48 +94,48 @@ jobs:
           file_name=$(echo ${{env.url_sdk}} | awk -F/ '{print $NF}')
           mkdir sdk && tar -xf $file_name -C ./sdk --strip-components=1
           cd sdk
-          echo "src-git passwall_packages https://github.com/${{ env.packages}}.git;main" >> feeds.conf.default
-          echo "src-git passwall2 https://github.com/${{ env.passwall2 }}.git;main" >> feeds.conf.default
+          #echo "src-git passwall_packages https://github.com/${{ env.packages}}.git;main" >> feeds.conf.default
+          echo "src-git helloworld https://github.com/${{ env.helloworld }}.git;master" >> feeds.conf.default
           ./scripts/feeds update -a
           ./scripts/feeds install -a -f -p passwall_packages
-          echo "CONFIG_PACKAGE_luci-app-passwall2=m" > .config
-          ./scripts/feeds install -d n luci-app-passwall2
+          echo "CONFIG_PACKAGE_luci-app-ssr-plus=m" > .config
+          ./scripts/feeds install -d n luci-app-ssr-plus
           make download -j8
 
-      - name: Configure passwall2
+      - name: Configure helloworld
         run: |
           cd sdk
           ./scripts/feeds update passwall_packages
-          ./scripts/feeds update passwall2
-          ./scripts/feeds install luci-app-passwall2
+          ./scripts/feeds update helloworld
+          ./scripts/feeds install luci-app-ssr-plus
           echo "CONFIG_ALL_NONSHARED=n" > .config
           echo "CONFIG_ALL_KMODS=n" >> .config
           echo "CONFIG_ALL=n" >> .config
           echo "CONFIG_AUTOREMOVE=n" >> .config
-          echo "CONFIG_PACKAGE_luci-app-passwall2=m" >> .config
+          echo "CONFIG_PACKAGE_luci-app-ssr-plus=m" >> .config
 
           make defconfig
 
-      - name: Compile passwall2
+      - name: Compile helloworld
         id: compile
         run: |
           cd sdk
-          echo "make package/luci-app-passwall2/{clean,compile} -j$(nproc)"
-          make package/luci-app-passwall2/{clean,compile} -j$(nproc)
-          mv bin/packages/x86_64/passwall2/ ../
+          echo "make package/luci-app-ssr-plus/{clean,compile} -j$(nproc)"
+          make package/luci-app-ssr-plus/{clean,compile} -j$(nproc)
+          mv bin/packages/x86_64/helloworld/ ../
           rm .config .config.old
           cd ..
           echo "status=success" >> $GITHUB_OUTPUT
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV
 
-      - name: Upload passwall2 ipks to release
+      - name: Upload helloworld ipks to release
         uses: softprops/action-gh-release@master
         if: steps.compile.outputs.status == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{needs.job_check.outputs.passwall2_version}}
-          files: ${{ env.FIRMWARE }}/passwall2/*.ipk
+          tag_name: ${{needs.job_check.outputs.helloworld_version}}
+          files: ${{ env.FIRMWARE }}/helloworld/*.ipk
 
 
   job_auto_compile:
@@ -223,18 +223,18 @@ jobs:
       - name: ${{ matrix.platform }} feeds configuration packages
         run: |
           cd sdk
-          echo "src-git passwall_packages https://github.com/${{ env.packages}}.git;main" >> feeds.conf.default
-          echo "src-git passwall2 https://github.com/${{ env.passwall2 }}.git;main" >> feeds.conf.default
+          #echo "src-git passwall_packages https://github.com/${{ env.packages}}.git;main" >> feeds.conf.default
+          echo "src-git helloworld https://github.com/${{ env.helloworld }}.git;master" >> feeds.conf.default
 
           ./scripts/feeds update -a
           ./scripts/feeds install -a -f -p passwall_packages
-          ./scripts/feeds install luci-app-passwall2
+          ./scripts/feeds install luci-app-ssr-plus
 
           echo "CONFIG_ALL_NONSHARED=n" > .config
           echo "CONFIG_ALL_KMODS=n" >> .config
           echo "CONFIG_ALL=n" >> .config
           echo "CONFIG_AUTOREMOVE=n" >> .config
-          echo "CONFIG_PACKAGE_luci-app-passwall2=m" >> .config
+          echo "CONFIG_PACKAGE_luci-app-ssr-plus=m" >> .config
 
           make defconfig
 
@@ -249,7 +249,7 @@ jobs:
         id: compile
         run: |
           cd sdk
-          make package/luci-app-passwall2/{clean,compile} -j$(nproc)
+          make package/luci-app-ssr-plus/{clean,compile} -j$(nproc)
 
           echo "status=success" >> $GITHUB_OUTPUT
 
@@ -260,7 +260,7 @@ jobs:
           cd sdk
           mkdir upload
 
-          zip -jr upload/passwall2_packages_ipk_${{ matrix.platform }}.zip bin/packages/*/passwall_packages/
+          zip -jr upload/helloworld_packages_ipk_${{ matrix.platform }}.zip bin/packages/*/passwall_packages/
 
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
@@ -271,9 +271,9 @@ jobs:
         run: |
           cd sdk
           echo "## :mega:Update content" >> release.txt
-          echo "![](https://img.shields.io/github/downloads/${{ env.passwall2 }}/${{needs.job_check.outputs.passwall2_version}}/total?style=flat-square)" >> release.txt
-          echo "### Passwall2 Info" >> release.txt
-          echo "**:minidisc: Passwall2 Version: ${{needs.job_check.outputs.passwall2_version}}**" >> release.txt
+          echo "![](https://img.shields.io/github/downloads/${{ env.helloworld }}/${{needs.job_check.outputs.helloworld_version}}/total?style=flat-square)" >> release.txt
+          echo "### helloworld Info" >> release.txt
+          echo "**:minidisc: helloworld Version: ${{needs.job_check.outputs.helloworld_version}}**" >> release.txt
           echo "**:gear: OpenWrt SDK Version: 24.10.1**" >> release.txt
 
           echo "### Packages Version" >> release.txt
@@ -298,6 +298,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{needs.job_check.outputs.passwall2_version}}
+          tag_name: ${{needs.job_check.outputs.helloworld_version}}
           body_path: ${{ env.FIRMWARE }}/release.txt
           files: ${{ env.FIRMWARE }}/upload/*
