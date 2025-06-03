@@ -22,13 +22,13 @@ PKG_LICENSE_FILES:=LICENSE
 
 PKG_BUILD_PARALLEL:=1
 
-PKG_BUILD_DEPENDS:=rust/host
+#PKG_BUILD_DEPENDS:=rust/host
 PKG_BUILD_PARALLEL:=1
 
 #RUST_PKG:=dns2socks
 
 include $(INCLUDE_DIR)/package.mk
-include $(TOPDIR)/feeds/packages/lang/rust/rust-package.mk
+#include $(TOPDIR)/feeds/packages/lang/rust/rust-package.mk
 
 define Package/dns2socks-rust
     SECTION:=net
