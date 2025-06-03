@@ -97,7 +97,7 @@ jobs:
           #echo "src-git passwall_packages https://github.com/${{ env.packages}}.git;main" >> feeds.conf.default
           echo "src-git helloworld https://github.com/${{ env.helloworld }}.git;master" >> feeds.conf.default
           ./scripts/feeds update -a
-          ./scripts/feeds install -a -f -p passwall_packages
+          ./scripts/feeds install -a -f -p helloworld
           echo "CONFIG_PACKAGE_luci-app-ssr-plus=m" > .config
           ./scripts/feeds install -d n luci-app-ssr-plus
           make download -j8
@@ -105,7 +105,6 @@ jobs:
       - name: Configure helloworld
         run: |
           cd sdk
-          ./scripts/feeds update passwall_packages
           ./scripts/feeds update helloworld
           ./scripts/feeds install luci-app-ssr-plus
           echo "CONFIG_ALL_NONSHARED=n" > .config
@@ -227,7 +226,7 @@ jobs:
           echo "src-git helloworld https://github.com/${{ env.helloworld }}.git;master" >> feeds.conf.default
 
           ./scripts/feeds update -a
-          ./scripts/feeds install -a -f -p passwall_packages
+          ./scripts/feeds install -a -f -p helloworld
           ./scripts/feeds install luci-app-ssr-plus
 
           echo "CONFIG_ALL_NONSHARED=n" > .config
